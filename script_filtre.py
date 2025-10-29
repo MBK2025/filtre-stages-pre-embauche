@@ -26,13 +26,13 @@ if not CLIENT_ID or not CLIENT_SECRET:
 # --- 2. OBTENIR LE TOKEN D'ACCÈS ---
 
 print("Tentative d'obtention du token d'accès...")
-# L'URL D'AUTH QUI FONCTIONNE (pole-emploi.fr)
-auth_url = "https://entreprise.pole-emploi.fr/connexion/oauth2/access_token?realm=/partenaire"
+# HYPOTHÈSE FINALE : LE NOUVEAU SERVEUR D'AUTH (entreprise.francetravail.fr)
+auth_url = "https://entreprise.francetravail.fr/connexion/oauth2/access_token?realm=/partenaire"
 auth_data = {
     "grant_type": "client_credentials",
     "client_id": CLIENT_ID,
     "client_secret": CLIENT_SECRET,
-    "scope": "o2dsoffre" # LE SCOPE QUI FONCTIONNE !
+    "scope": "o2dsoffre api_offresdemploi" # LES BONS SCOPES (de votre capture d'écran)
 }
 auth_response = requests.post(auth_url, data=auth_data, timeout=30)
 
@@ -43,7 +43,7 @@ if auth_response.status_code != 200:
     raise Exception("Erreur d'authentification à l'API France Travail. Voir détails ci-dessus.")
 
 ACCESS_TOKEN = auth_response.json()["access_token"]
-print("Token d'accès obtenu.") # <-- VICTOIRE !
+print("Token d'accès obtenu.") # <-- C'EST CE QUE NOUS VOULONS VOIR !
 
 # --- 3. RECHERCHER LES OFFRES DE STAGE ---
 
@@ -51,7 +51,6 @@ print("Recherche des offres de stage...")
 # ON UTILISE LA NOUVELLE URL DE L'API (FRANCETRAVAIL.IO)
 search_url = "https://api.francetravail.io/partenaire/offresdemploi/v2/offres/search"
 
-# MODIFICATION IMPORTANTE ICI
 headers = {
     "Authorization": f"Bearer {ACCESS_TOKEN}",
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
@@ -66,7 +65,7 @@ search_response = requests.get(search_url, headers=headers, params=params, timeo
 
 if search_response.status_code != 200:
     print(f"Erreur lors de la recherche d'offres. Statut: {search_response.status_code}")
-    print(f"Réponse: {search_response.text}") # On espère une réponse cette fois
+    print(f"Réponse: {search_response.text}")
     raise Exception(f"Erreur lors de la recherche d'offres.")
 
 offres_brutes = search_response.json().get("resultats", [])
