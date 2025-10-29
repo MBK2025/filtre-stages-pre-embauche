@@ -32,7 +32,7 @@ auth_data = {
     "grant_type": "client_credentials",
     "client_id": CLIENT_ID,
     "client_secret": CLIENT_SECRET,
-    "scope": "api_offresdemploi" # ON ESSAIE UN SEUL SCOPE DE LA LISTE
+    "scope": "o2dsoffre" # <-- ON ESSAIE L'AUTRE SCOPE DE LA LISTE, TOUT SEUL
 }
 auth_response = requests.post(auth_url, data=auth_data, timeout=30)
 
