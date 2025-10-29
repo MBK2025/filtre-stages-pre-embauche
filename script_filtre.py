@@ -30,8 +30,8 @@ auth_url = "https://entreprise.pole-emploi.fr/connexion/oauth2/access_token?real
 auth_data = {
     "grant_type": "client_credentials",
     "client_id": CLIENT_ID,
-    "client_secret": CLIENT_SECRET
-    # <-- J'AI COMPLÈTEMENT SUPPRIMÉ LA LIGNE "scope" ICI
+    "client_secret": CLIENT_SECRET,
+    "scope": "api_offresdemploi_v2" # <-- LE SCOPE LOGIQUE : LE NOM DE L'API V2
 }
 auth_response = requests.post(auth_url, data=auth_data, timeout=30)
 
