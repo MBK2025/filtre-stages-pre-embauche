@@ -26,13 +26,13 @@ if not CLIENT_ID or not CLIENT_SECRET:
 # --- 2. OBTENIR LE TOKEN D'ACCÈS ---
 
 print("Tentative d'obtention du token d'accès...")
-# CORRECTION FINALE : LE BON SERVEUR D'AUTH (api.francetravail.io)
-auth_url = "https://api.francetravail.io/connexion/oauth2/access_token?realm=/partenaire"
+# ON REVIENT À L'URL D'AUTH QUI FONCTIONNE (POLE-EMPLOI.FR)
+auth_url = "https://entreprise.pole-emploi.fr/connexion/oauth2/access_token?realm=/partenaire"
 auth_data = {
     "grant_type": "client_credentials",
     "client_id": CLIENT_ID,
     "client_secret": CLIENT_SECRET,
-    "scope": "o2dsoffre api_offresdemploi" # LES BONS SCOPES (de votre capture d'écran)
+    "scope": "api_offresdemploi" # ON ESSAIE UN SEUL SCOPE DE LA LISTE
 }
 auth_response = requests.post(auth_url, data=auth_data, timeout=30)
 
@@ -48,7 +48,7 @@ print("Token d'accès obtenu.") # <-- C'EST CE QUE NOUS VOULONS VOIR !
 # --- 3. RECHERCHER LES OFFRES DE STAGE ---
 
 print("Recherche des offres de stage...")
-# LA BONNE URL DE RECHERCHE (v2)
+# ON UTILISE LA NOUVELLE URL DE L'API (FRANCETRAVAIL.IO)
 search_url = "https://api.francetravail.io/partenaire/offresdemploi/v2/offres/search"
 headers = {
     "Authorization": f"Bearer {ACCESS_TOKEN}"
