@@ -26,13 +26,13 @@ if not CLIENT_ID or not CLIENT_SECRET:
 # --- 2. OBTENIR LE TOKEN D'ACCÈS ---
 
 print("Tentative d'obtention du token d'accès...")
-# ON REVIENT À L'URL D'AUTH QUI FONCTIONNE (POLE-EMPLOI.FR)
+# L'URL D'AUTH QUI FONCTIONNE (pole-emploi.fr)
 auth_url = "https://entreprise.pole-emploi.fr/connexion/oauth2/access_token?realm=/partenaire"
 auth_data = {
     "grant_type": "client_credentials",
     "client_id": CLIENT_ID,
     "client_secret": CLIENT_SECRET,
-    "scope": "o2dsoffre" # <-- ON ESSAIE L'AUTRE SCOPE DE LA LISTE, TOUT SEUL
+    "scope": "o2dsoffre" # LE SCOPE QUI FONCTIONNE !
 }
 auth_response = requests.post(auth_url, data=auth_data, timeout=30)
 
@@ -43,13 +43,13 @@ if auth_response.status_code != 200:
     raise Exception("Erreur d'authentification à l'API France Travail. Voir détails ci-dessus.")
 
 ACCESS_TOKEN = auth_response.json()["access_token"]
-print("Token d'accès obtenu.") # <-- C'EST CE QUE NOUS VOULONS VOIR !
+print("Token d'accès obtenu.") # <-- VICTOIRE !
 
 # --- 3. RECHERCHER LES OFFRES DE STAGE ---
 
 print("Recherche des offres de stage...")
-# ON UTILISE LA NOUVELLE URL DE L'API (FRANCETRAVAIL.IO)
-search_url = "https://api.francetravail.io/partenaire/offresdemploi/v2/offres/search"
+# ON REVIENT À L'ANCIENNE URL DE RECHERCHE (emploi-store.fr)
+search_url = "https://api.emploi-store.fr/partenaire/offresdemploi/v2/offres/search"
 headers = {
     "Authorization": f"Bearer {ACCESS_TOKEN}"
 }
