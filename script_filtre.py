@@ -26,8 +26,8 @@ if not CLIENT_ID or not CLIENT_SECRET:
 # --- 2. OBTENIR LE TOKEN D'ACCÈS ---
 
 print("Tentative d'obtention du token d'accès...")
-# NOUVELLE URL D'AUTHENTIFICATION (la bonne !)
-auth_url = "https://partenaire.francetravail.fr/connexion/oauth2/access_token?realm=/partenaire"
+# CORRECTION FINALE : LE BON SERVEUR D'AUTH (api.francetravail.io)
+auth_url = "https://api.francetravail.io/connexion/oauth2/access_token?realm=/partenaire"
 auth_data = {
     "grant_type": "client_credentials",
     "client_id": CLIENT_ID,
@@ -48,7 +48,7 @@ print("Token d'accès obtenu.") # <-- C'EST CE QUE NOUS VOULONS VOIR !
 # --- 3. RECHERCHER LES OFFRES DE STAGE ---
 
 print("Recherche des offres de stage...")
-# NOUVELLE URL DE RECHERCHE (la bonne, v2)
+# LA BONNE URL DE RECHERCHE (v2)
 search_url = "https://api.francetravail.io/partenaire/offresdemploi/v2/offres/search"
 headers = {
     "Authorization": f"Bearer {ACCESS_TOKEN}"
