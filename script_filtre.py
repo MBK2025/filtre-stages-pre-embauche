@@ -31,7 +31,7 @@ auth_data = {
     "grant_type": "client_credentials",
     "client_id": CLIENT_ID,
     "client_secret": CLIENT_SECRET,
-    "scope": "ouresdemploi" # <-- NOTRE NOUVELLE (ET DERNIÈRE) TENTATIVE LOGIQUE
+    "scope": "read" # <-- NOTRE ULTIME TENTATIVE : UN SCOPE GÉNÉRIQUE
 }
 auth_response = requests.post(auth_url, data=auth_data, timeout=30)
 
