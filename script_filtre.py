@@ -50,8 +50,11 @@ print("Token d'accès obtenu.") # <-- VICTOIRE !
 print("Recherche des offres de stage...")
 # ON UTILISE LA NOUVELLE URL DE L'API (FRANCETRAVAIL.IO)
 search_url = "https://api.francetravail.io/partenaire/offresdemploi/v2/offres/search"
+
+# MODIFICATION IMPORTANTE ICI
 headers = {
-    "Authorization": f"Bearer {ACCESS_TOKEN}"
+    "Authorization": f"Bearer {ACCESS_TOKEN}",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
 }
 params = {
     "typeContrat": "STY",  # STY = Stage
@@ -63,7 +66,7 @@ search_response = requests.get(search_url, headers=headers, params=params, timeo
 
 if search_response.status_code != 200:
     print(f"Erreur lors de la recherche d'offres. Statut: {search_response.status_code}")
-    print(f"Réponse: {search_response.text}")
+    print(f"Réponse: {search_response.text}") # On espère une réponse cette fois
     raise Exception(f"Erreur lors de la recherche d'offres.")
 
 offres_brutes = search_response.json().get("resultats", [])
