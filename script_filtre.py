@@ -32,7 +32,7 @@ auth_data = {
     "grant_type": "client_credentials",
     "client_id": CLIENT_ID,
     "client_secret": CLIENT_SECRET,
-    "scope": "api_offresdemploi_v2 ouresdemploi" # <-- CORRECTION FINALE DU SCOPE
+    "scope": "application_Not-candidat" # <-- NOUVELLE TENTATIVE DE SCOPE
 }
 auth_response = requests.post(auth_url, data=auth_data, timeout=30) # Ajout d'un timeout
 
