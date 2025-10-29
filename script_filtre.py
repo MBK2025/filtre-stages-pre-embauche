@@ -48,8 +48,8 @@ print("Token d'accès obtenu.") # <-- VICTOIRE !
 # --- 3. RECHERCHER LES OFFRES DE STAGE ---
 
 print("Recherche des offres de stage...")
-# ON REVIENT À L'ANCIENNE URL DE RECHERCHE (emploi-store.fr)
-search_url = "https://api.emploi-store.fr/partenaire/offresdemploi/v2/offres/search"
+# ON UTILISE LA NOUVELLE URL DE L'API (FRANCETRAVAIL.IO)
+search_url = "https://api.francetravail.io/partenaire/offresdemploi/v2/offres/search"
 headers = {
     "Authorization": f"Bearer {ACCESS_TOKEN}"
 }
