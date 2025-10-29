@@ -27,15 +27,33 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
+      # ----------------------------------------------------
+      # ÉTAPE DE DÉBOGAGE AJOUTÉE
+      # ----------------------------------------------------
+      - name: Debug secrets (vérifie les espaces)
+        env:
+          TEST_ID: ${{ secrets.FT_CLIENT_ID }}
+          TEST_SECRET: ${{ secrets.FT_SECRET }}
+        run: |
+          echo "--- DÉBUT DÉBOGAGE SECRETS ---"
+          echo "Test FT_CLIENT_ID (longueur): ${#TEST_ID}"
+          echo "Test FT_CLIENT_ID (5 premiers chars): $(echo $TEST_ID | cut -c1-5)"
+          echo "Test FT_SECRET (longueur): ${#TEST_SECRET}"
+          echo "Test FT_SECRET (5 premiers chars): $(echo $TEST_SECRET | cut -c1-5)"
+          echo "--- FIN DÉBOGAGE SECRETS ---"
+      # ----------------------------------------------------
+      # FIN DE L'ÉTAPE DE DÉBOGAGE
+      # ----------------------------------------------------
+
       # 4. Exécute notre script Python
-      # Les secrets (FT_CLIENT_ID, FT_SECRET) sont injectés en variables d'environnement
+      # Le script va échouer ici, mais le débogage ci-dessus nous donnera des indices
       - name: Run Python script
         env:
           FT_CLIENT_ID: ${{ secrets.FT_CLIENT_ID }}
           FT_SECRET: ${{ secrets.FT_SECRET }}
         run: python script_filtre.py
 
-      # 5. Sauvegarde le fichier .json généré dans le dépôt
+      # 5. Sauvegarde le fichier .json généré dans le dépôt (ne sera pas atteint cette fois)
       - name: Commit and push changes
         run: |
           git config --global user.name "Bot-Filtre-Stages"
