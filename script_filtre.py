@@ -32,7 +32,7 @@ auth_data = {
     "grant_type": "client_credentials",
     "client_id": CLIENT_ID,
     "client_secret": CLIENT_SECRET,
-    "scope": "api_offresdemploi_v2 ouresdemploi"
+    "scope": "api_offresdemploi_v2" # <-- MODIFICATION IMPORTANTE ICI
 }
 auth_response = requests.post(auth_url, data=auth_data)
 
@@ -49,6 +49,7 @@ print("Token d'accès obtenu.")
 
 # --- 3. RECHERCHER LES OFFRES DE STAGE ---
 
+print("Recherche des offres de stage...")
 search_url = "https://api.emploi-store.fr/partenaire/offresdemploi/v2/offres/search"
 headers = {
     "Authorization": f"Bearer {ACCESS_TOKEN}"
@@ -62,7 +63,9 @@ params = {
 search_response = requests.get(search_url, headers=headers, params=params)
 
 if search_response.status_code != 200:
-    raise Exception(f"Erreur lors de la recherche d'offres: {search_response.text}")
+    print(f"Erreur lors de la recherche d'offres. Statut: {search_response.status_code}")
+    print(f"Réponse: {search_response.text}")
+    raise Exception(f"Erreur lors de la recherche d'offres.")
 
 offres_brutes = search_response.json().get("resultats", [])
 print(f"{len(offres_brutes)} offres de stage trouvées.")
