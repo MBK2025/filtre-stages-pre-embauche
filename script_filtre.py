@@ -32,9 +32,9 @@ auth_data = {
     "grant_type": "client_credentials",
     "client_id": CLIENT_ID,
     "client_secret": CLIENT_SECRET,
-    "scope": "api_offresdemploi_v2" # <-- MODIFICATION IMPORTANTE ICI
+    "scope": "api_offresdemploi_v2 ouresdemploi" # <-- CORRECTION FINALE DU SCOPE
 }
-auth_response = requests.post(auth_url, data=auth_data)
+auth_response = requests.post(auth_url, data=auth_data, timeout=30) # Ajout d'un timeout
 
 if auth_response.status_code != 200:
     # --- DÉBOGAGE AMÉLIORÉ ---
@@ -45,7 +45,7 @@ if auth_response.status_code != 200:
     raise Exception("Erreur d'authentification à l'API France Travail. Voir détails ci-dessus.")
 
 ACCESS_TOKEN = auth_response.json()["access_token"]
-print("Token d'accès obtenu.")
+print("Token d'accès obtenu.") # <-- C'EST CE QUE NOUS VOULONS VOIR !
 
 # --- 3. RECHERCHER LES OFFRES DE STAGE ---
 
@@ -60,7 +60,7 @@ params = {
     "sort": 1              # 1 = trier par date de publication (plus récent)
 }
 
-search_response = requests.get(search_url, headers=headers, params=params)
+search_response = requests.get(search_url, headers=headers, params=params, timeout=30) # Ajout d'un timeout
 
 if search_response.status_code != 200:
     print(f"Erreur lors de la recherche d'offres. Statut: {search_response.status_code}")
