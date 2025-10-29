@@ -26,6 +26,7 @@ if not CLIENT_ID or not CLIENT_SECRET:
 
 # --- 2. OBTENIR LE TOKEN D'ACCÈS ---
 
+print("Tentative d'obtention du token d'accès...")
 auth_url = "https://entreprise.pole-emploi.fr/connexion/oauth2/access_token?realm=/partenaire"
 auth_data = {
     "grant_type": "client_credentials",
@@ -36,7 +37,12 @@ auth_data = {
 auth_response = requests.post(auth_url, data=auth_data)
 
 if auth_response.status_code != 200:
-    raise Exception("Erreur d'authentification à l'API France Travail.")
+    # --- DÉBOGAGE AMÉLIORÉ ---
+    print(f"ÉCHEC DE L'AUTHENTIFICATION.")
+    print(f"Code de statut reçu: {auth_response.status_code}")
+    print(f"Réponse détaillée du serveur: {auth_response.text}") # Ceci va nous dire le VRAI problème
+    # --- FIN DÉBOGAGE ---
+    raise Exception("Erreur d'authentification à l'API France Travail. Voir détails ci-dessus.")
 
 ACCESS_TOKEN = auth_response.json()["access_token"]
 print("Token d'accès obtenu.")
