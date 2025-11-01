@@ -1,10 +1,9 @@
 import requests
 import os
 import json
+import sys
 
-# --- 1. CONFIGURATION ---
-
-# Vos mots-clés pour le filtre "pré-embauche"
+# --- 1️⃣ CONFIGURATION DES MOTS-CLÉS ---
 KEYWORDS = [
     "pré-embauche",
     "pre-embauche",
@@ -16,47 +15,45 @@ KEYWORDS = [
     "opportunité d'embauche"
 ]
 
-# Récupérer les clés depuis les Secrets GitHub
-CLIENT_ID = os.environ.get('FT_CLIENT_ID')
-CLIENT_SECRET = os.environ.get('FT_SECRET')
+# --- 2️⃣ VARIABLES D'ENVIRONNEMENT ---
+CLIENT_ID = os.environ.get("FT_CLIENT_ID")
+CLIENT_SECRET = os.environ.get("FT_SECRET")
 
 if not CLIENT_ID or not CLIENT_SECRET:
-    raise Exception("Erreur: FT_CLIENT_ID ou FT_SECRET non défini.")
+    sys.exit("❌ Erreur : variables FT_CLIENT_ID ou FT_SECRET non définies.")
 
-# --- 2. OBTENIR LE TOKEN D'ACCÈS ---
+# --- 3️⃣ AUTHENTIFICATION FRANCE TRAVAIL ---
+print("🔐 Tentative d'obtention du token d'accès...")
 
-print("Tentative d'obtention du token d'accès...")
-# HYPOTHÈSE FINALE : LE NOUVEAU SERVEUR D'AUTH (entreprise.francetravail.fr)
 auth_url = "https://entreprise.francetravail.fr/connexion/oauth2/access_token?realm=/partenaire"
 auth_data = {
     "grant_type": "client_credentials",
     "client_id": CLIENT_ID,
     "client_secret": CLIENT_SECRET,
-    "scope": "o2dsoffre api_offresdemploi" # LES BONS SCOPES (de votre capture d'écran)
+    "scope": "api_offresdemploi o2dsoffre"
 }
+
 auth_response = requests.post(auth_url, data=auth_data, timeout=30)
 
 if auth_response.status_code != 200:
-    print(f"ÉCHEC DE L'AUTHENTIFICATION.")
-    print(f"Code de statut reçu: {auth_response.status_code}")
-    print(f"Réponse détaillée du serveur: {auth_response.text}")
-    raise Exception("Erreur d'authentification à l'API France Travail. Voir détails ci-dessus.")
+    print("❌ Échec de l'authentification à l'API France Travail.")
+    print(f"Code HTTP : {auth_response.status_code}")
+    print("Réponse complète :", auth_response.text)
+    sys.exit(1)
 
-ACCESS_TOKEN = auth_response.json()["access_token"]
-print("Token d'accès obtenu.") # <-- C'EST CE QUE NOUS VOULONS VOIR !
+ACCESS_TOKEN = auth_response.json().get("access_token")
+print("✅ Token d'accès obtenu avec succès.")
 
-# --- 3. RECHERCHER LES OFFRES DE STAGE ---
+# --- 4️⃣ RECHERCHE DES OFFRES ---
+print("🔍 Recherche des offres de stage...")
 
-print("Recherche des offres de stage...")
-# ON UTILISE LA NOUVELLE URL DE L'API (FRANCETRAVAIL.IO)
 search_url = "https://api.francetravail.io/partenaire/offresdemploi/v2/offres/search"
-
 headers = {
     "Authorization": f"Bearer {ACCESS_TOKEN}",
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
+    "User-Agent": "StagePreEmbaucheBot/1.0"
 }
 params = {
-    "typeContrat": "STY",  # STY = Stage
+    "typeContrat": "STY",
     "range": "0-149",
     "sort": 1
 }
@@ -64,39 +61,31 @@ params = {
 search_response = requests.get(search_url, headers=headers, params=params, timeout=30)
 
 if search_response.status_code != 200:
-    print(f"Erreur lors de la recherche d'offres. Statut: {search_response.status_code}")
-    print(f"Réponse: {search_response.text}")
-    raise Exception(f"Erreur lors de la recherche d'offres.")
+    print("❌ Erreur lors de la récupération des offres.")
+    print("Réponse :", search_response.text)
+    sys.exit(1)
 
-offres_brutes = search_response.json().get("resultats", [])
-print(f"{len(offres_brutes)} offres de stage trouvées.")
+offres = search_response.json().get("resultats", [])
+print(f"📦 {len(offres)} offres de stage récupérées.")
 
-# --- 4. FILTRER LES OFFRES ---
-
+# --- 5️⃣ FILTRAGE ---
 stages_filtres = []
-
-for offre in offres_brutes:
-    titre = offre.get("intitule", "").lower()
-    description = offre.get("description", "").lower()
-    texte_complet = titre + " " + description
-    
-    if any(keyword in texte_complet for keyword in KEYWORDS):
-        stage_propre = {
+for offre in offres:
+    texte = f"{offre.get('intitule', '').lower()} {offre.get('description', '').lower()}"
+    if any(keyword in texte for keyword in KEYWORDS):
+        stages_filtres.append({
             "id": offre.get("id"),
             "titre": offre.get("intitule"),
             "entreprise": offre.get("entreprise", {}).get("nom", "Non précisé"),
             "lieu": offre.get("lieuTravail", {}).get("libelle", "Non précisé"),
             "url": offre.get("origineOffre", {}).get("urlOrigine", "#")
-        }
-        stages_filtres.append(stage_propre)
+        })
 
-print(f"{len(stages_filtres)} offres de stage filtrées (pré-embauche).")
+print(f"✅ {len(stages_filtres)} offres correspondent au filtre pré-embauche.")
 
-# --- 5. SAUVEGARDER DANS LE FICHIER JSON ---
+# --- 6️⃣ SAUVEGARDE ---
+output_filename = "stages_filtres.json"
+with open(output_filename, "w", encoding="utf-8") as f:
+    json.dump(stages_filtres, f, ensure_ascii=False, indent=2)
 
-output_filename = "stages_filtres.json" 
-
-with open(output_filename, 'w', encoding='utf-8') as f:
-    json.dump(stages_filtres, f, indent=2, ensure_ascii=False)
-
-print(f"Fichier '{output_filename}' sauvegardé avec succès.")
+print(f"💾 Fichier '{output_filename}' généré avec succès.")
