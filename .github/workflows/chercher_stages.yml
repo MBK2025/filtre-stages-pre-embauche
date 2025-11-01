@@ -1,64 +1,36 @@
-name: Chercheur de Stages (Pré-embauche)
+name: Mettre à jour les stages pré-embauche
 
 on:
-  # Permet de le lancer manuellement depuis l'onglet "Actions" de GitHub
-  workflow_dispatch:
-  
-  # Lance le script tous les jours à 8h00 du matin (heure UTC)
   schedule:
-    - cron: '0 8 * * *'
+    - cron: "0 6 * * *"   # Tous les jours à 6h00 UTC (7h/8h heure française)
+  workflow_dispatch:       # Permet de le lancer manuellement depuis l'onglet Actions
 
 jobs:
-  build-and-commit:
+  update-stages:
     runs-on: ubuntu-latest
-    
+
     steps:
-      # 1. Récupère le code du dépôt
-      - name: Checkout code
+      - name: 📥 Cloner le dépôt
         uses: actions/checkout@v4
 
-      # 2. Installe Python
-      - name: Set up Python
+      - name: 🐍 Installer Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
-      # 3. Installe la seule dépendance (requests)
-      - name: Install dependencies
+      - name: 📦 Installer les dépendances
         run: pip install requests
 
-      # ----------------------------------------------------
-      # ÉTAPE DE DÉBOGAGE AJOUTÉE
-      # ----------------------------------------------------
-      - name: Debug secrets (vérifie les espaces)
-        env:
-          TEST_ID: ${{ secrets.FT_CLIENT_ID }}
-          TEST_SECRET: ${{ secrets.FT_SECRET }}
-        run: |
-          echo "--- DÉBUT DÉBOGAGE SECRETS ---"
-          echo "Test FT_CLIENT_ID (longueur): ${#TEST_ID}"
-          echo "Test FT_CLIENT_ID (5 premiers chars): $(echo $TEST_ID | cut -c1-5)"
-          echo "Test FT_SECRET (longueur): ${#TEST_SECRET}"
-          echo "Test FT_SECRET (5 premiers chars): $(echo $TEST_SECRET | cut -c1-5)"
-          echo "--- FIN DÉBOGAGE SECRETS ---"
-      # ----------------------------------------------------
-      # FIN DE L'ÉTAPE DE DÉBOGAGE
-      # ----------------------------------------------------
-
-      # 4. Exécute notre script Python
-      # Le script va échouer ici, mais le débogage ci-dessus nous donnera des indices
-      - name: Run Python script
+      - name: 🔑 Exécuter le script pour générer le JSON
         env:
           FT_CLIENT_ID: ${{ secrets.FT_CLIENT_ID }}
           FT_SECRET: ${{ secrets.FT_SECRET }}
         run: python script_filtre.py
 
-      # 5. Sauvegarde le fichier .json généré dans le dépôt (ne sera pas atteint cette fois)
-      - name: Commit and push changes
+      - name: 💾 Commit et push du fichier JSON généré
         run: |
-          git config --global user.name "Bot-Filtre-Stages"
-          git config --global user.email "bot@github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add stages_filtres.json
-          # Commit seulement s'il y a des changements
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Mise à jour des offres de stage (pré-embauche)" && git push)
-          echo "Données mises à jour."
+          git commit -m "Mise à jour automatique des offres de stage [bot]" || echo "Aucune mise à jour"
+          git push
